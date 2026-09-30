@@ -1,0 +1,105 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: py src/prepare.py
+    deps:
+    - path: data/raw/flooddata.csv
+      hash: md5
+      md5: 3b7251d019a44cff814b90acece03e7f
+      size: 2071592
+    - path: params.yaml
+      hash: md5
+      md5: 666f60c91ddc70fd7ad9e50551d79c58
+      size: 165
+    - path: src/prepare.py
+      hash: md5
+      md5: de5b9d958cdd011b0ca53ce379b6a2bb
+      size: 1519
+    params:
+      params.yaml:
+        prepare.clip_quantiles:
+        - 0.01
+        - 0.99
+        prepare.iqr_passes: 5
+    outs:
+    - path: data/processed/flood_data_preprocessed.csv
+      hash: md5
+      md5: 2eafee84e936465309a3f782a24c4040
+      size: 2703057
+  train:
+    cmd: py src/train.py
+    deps:
+    - path: data/processed/flood_data_preprocessed.csv
+      hash: md5
+      md5: 2eafee84e936465309a3f782a24c4040
+      size: 2703057
+    - path: params.yaml
+      hash: md5
+      md5: 666f60c91ddc70fd7ad9e50551d79c58
+      size: 165
+    - path: src/train.py
+      hash: md5
+      md5: cf485acd184540003f9dc8f70aa6f6a0
+      size: 2029
+    params:
+      params.yaml:
+        train.max_depth:
+        train.n_estimators: 200
+        train.random_state: 42
+        train.test_size: 0.2
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: ed68086c5cb59af3f5ba972415a19eb9
+      size: 3145153
+    - path: models/flood_model.pkl
+      hash: md5
+      md5: c5863a2b228063da34253595164d648e
+      size: 29418281
+    - path: models/model_features.pkl
+      hash: md5
+      md5: a600a8f9e9649693482925f1e907369d
+      size: 978
+    - path: models/scaler.pkl
+      hash: md5
+      md5: 130860201e5e1aec76b917d9361a09ad
+      size: 2855
+  evaluate:
+    cmd: py src/evaluate.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: ed68086c5cb59af3f5ba972415a19eb9
+      size: 3145153
+    - path: models/flood_model.pkl
+      hash: md5
+      md5: c5863a2b228063da34253595164d648e
+      size: 29418281
+    - path: models/model_features.pkl
+      hash: md5
+      md5: a600a8f9e9649693482925f1e907369d
+      size: 978
+    - path: models/scaler.pkl
+      hash: md5
+      md5: 130860201e5e1aec76b917d9361a09ad
+      size: 2855
+    - path: params.yaml
+      hash: md5
+      md5: 666f60c91ddc70fd7ad9e50551d79c58
+      size: 165
+    - path: src/evaluate.py
+      hash: md5
+      md5: 0c76c04a7085275d89d33d2ee0871838
+      size: 1824
+    params:
+      params.yaml:
+        evaluate.threshold: 0.5
+    outs:
+    - path: metrics/metrics.json
+      hash: md5
+      md5: e2220499aaf21d5a82ecbf286fc3413a
+      size: 135
+    - path: reports/confusion_matrix.png
+      hash: md5
+      md5: 347484199e8432d7b11fb9e7b583fa28
+      size: 32418

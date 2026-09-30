@@ -1,0 +1,46 @@
+stages:
+  prepare:
+    cmd: py src/prepare.py
+    deps:
+      - data/raw/flooddata.csv
+      - src/prepare.py
+      - params.yaml
+    params:
+      - prepare.clip_quantiles
+      - prepare.iqr_passes
+    outs:
+      - data/processed/flood_data_preprocessed.csv
+
+  train:
+    cmd: py src/train.py
+    deps:
+      - data/processed/flood_data_preprocessed.csv
+      - src/train.py
+      - params.yaml
+    params:
+      - train.test_size
+      - train.random_state
+      - train.n_estimators
+      - train.max_depth
+    outs:
+      - models/flood_model.pkl
+      - models/scaler.pkl
+      - models/model_features.pkl
+      - data/processed/test.csv
+
+  evaluate:
+    cmd: py src/evaluate.py
+    deps:
+      - models/flood_model.pkl
+      - models/scaler.pkl
+      - models/model_features.pkl
+      - data/processed/test.csv
+      - src/evaluate.py
+      - params.yaml
+    params:
+      - evaluate.threshold
+    metrics:
+      - metrics/metrics.json:
+          cache: false
+    outs:
+      - reports/confusion_matrix.png
